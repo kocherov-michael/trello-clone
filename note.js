@@ -33,25 +33,44 @@ const Note = {
 		noteElement.addEventListener('drop', Note.drop)
 	},
 
+	// создаём элемент заметку
+	create () {
+		const noteElement = document.createElement('div')
+		noteElement.classList.add('note')
+		noteElement.setAttribute('draggable', 'true')
+		noteElement.setAttribute('data-note-id', Note.idCounter)
+
+		Note.idCounter++
+		Note.process(noteElement)
+
+		return noteElement
+	},
+
 	// начало перетаскивания элемента
 	dragstart (event) {
 		Note.dragged = this
 		this.classList.add('dragged')
+
+		event.stopPropagation()
 	},
 	
 	// конец перетаскивания элемента
 	dragend (event) {
-		Note.dragged = null
 		this.classList.remove('dragged')
+		Note.dragged = null
 		
 		document
 			.querySelectorAll('.note')
 			.forEach(x => x.classList.remove('under'))
+
+		event.stopPropagation()
 	},
 	
 	// заносим перетаскиваемый элемент над другим элементом
 	dragenter (event) {
-		if (this === Note.dragged) {
+		// Если перетаскиваем не карточку, 
+		// либо если карточку перетаскиваем над той же самой карточкой
+		if (!Note.dragged || this === Note.dragged) {
 			return
 		}
 		
@@ -60,7 +79,7 @@ const Note = {
 	
 	dragover (event) {
 		event.preventDefault()
-		if (this === Note.dragged) {
+		if (!Note.dragged || this === Note.dragged) {
 			return
 		}
 		event.stopPropagation()
@@ -68,7 +87,7 @@ const Note = {
 	
 	// выносим перетаскиваемый элемент из другого элемента
 	dragleave (event) {
-		if (this === Note.dragged) {
+		if (!Note.dragged || this === Note.dragged) {
 			return
 		}
 		this.classList.remove('under')
@@ -76,7 +95,14 @@ const Note = {
 	
 	// отпускаем мышку над этим элементом
 	drop (event) {
-		event.stopPropagation()
+		if (!Column.dragged) {
+			// если бросаем на карточку другую карточку
+			event.stopPropagation()
+		}
+		else { 
+			// если бросаем на карточку колонку
+			return
+		}
 		
 		if (this === Note.dragged) {
 			return
@@ -91,11 +117,9 @@ const Note = {
 			// меняем порядок соседних карточек в зависимости от перетаскивания 
 			if (indexA < indexB) {
 				this.parentElement.insertBefore(Note.dragged, this)
-				console.log('1')
 			}
 			else {
 				this.parentElement.insertBefore(Note.dragged, this.nextElementSibling)
-				console.log('2')
 			}
 		}
 		// если другой столбец, то вставляем перед той карточкой, над которой дропнули
