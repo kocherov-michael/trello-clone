@@ -1,8 +1,6 @@
-// id для следующих заметки и клонки
-let noteIdCounter = 9
+// id для следующих клонок
 let columnIdCounter = 4
 // элемент, который перетаскиваем
-let draggedNote = null
 
 document
 	.querySelectorAll('.column')
@@ -33,7 +31,7 @@ document
 
 document
 	.querySelectorAll('.note')
-	.forEach(noteProcess)
+	.forEach(Note.process)
 
 // прослушка кнопки добавления карточки
 function columnProcess (columnElement) {
@@ -44,113 +42,41 @@ function columnProcess (columnElement) {
 		const noteElement = document.createElement('div')
 		noteElement.classList.add('note')
 		noteElement.setAttribute('draggable', 'true')
-		noteElement.setAttribute('data-note-id', noteIdCounter)
+		noteElement.setAttribute('data-note-id', Note.idCounter)
 
-		noteIdCounter++
+		Note.idCounter++
+		
 		columnElement.querySelector('[data-notes]').append(noteElement)
+		Note.process(noteElement)
 
-		noteProcess(noteElement)
-
-	})
-
-	// редактирование заголовка столбца
-	const headerElement = columnElement.querySelector('.column-header')
-	headerElement.addEventListener('dblclick', function (event) {
-		headerElement.setAttribute('contenteditable', 'true')
-		headerElement.focus()
-	})
-	headerElement.addEventListener('blur', function (event) {
-		headerElement.removeAttribute('contenteditable')
-	})
-}
-
-// прослушка на заметке dblclick для редактирования и blur для прекращения
-function noteProcess (noteElement) {
-	noteElement.addEventListener('dblclick', function (event) {
+		// при создании карточки сразу идёт её редактирование
 		noteElement.setAttribute('contenteditable', 'true')
 		noteElement.focus()
 	})
 
-	noteElement.addEventListener('blur', function (event) {
-		noteElement.removeAttribute('contenteditable')
+	// редактирование заголовка столбца
+	const headerElement = columnElement.querySelector('.column-header')
+
+	headerElement.addEventListener('dblclick', function (event) {
+		headerElement.setAttribute('contenteditable', 'true')
+		headerElement.focus()
 	})
 
-	noteElement.addEventListener('dragstart', dragstart_noteHandler) 
-	noteElement.addEventListener('dragend', dragend_noteHandler) 
-	noteElement.addEventListener('dragenter', dragenter_noteHandler) 
-	noteElement.addEventListener('dragover', dragover_noteHandler) 
-	noteElement.addEventListener('dragleave', dragleave_noteHandler) 
-	noteElement.addEventListener('drop', drop_noteHandler) 
-}
+	headerElement.addEventListener('blur', function (event) {
+		headerElement.removeAttribute('contenteditable')
+	})
 
-// начало перетаскивания элемента
-function dragstart_noteHandler (event) {
-	// console.log('dragstart')
-	draggedNote = this
-	this.classList.add('dragged')
-}
+	// отменяем стандартную обработку при перетаскивании карточки в пустую колонку
+	columnElement.addEventListener('dragover', function (event) {
+		event.preventDefault()
+	})
 
-// конец перетаскивания элемента
-function dragend_noteHandler (event) {
-	draggedNote = null
-	this.classList.remove('dragged')
-
-	document
-		.querySelectorAll('.note')
-		.forEach(x => x.classList.remove('under'))
-}
-
-// заносим перетаскиваемый элемент над другим элементом
-function dragenter_noteHandler (event) {
-	if (this === draggedNote) {
-		return
-	}
-
-	this.classList.add('under')
-}
-
-function dragover_noteHandler (event) {
-	event.preventDefault()
-	if (this === draggedNote) {
-		return
-	}
-	event.stopPropagation()
-	// console.log(this)
-}
-
-// выносим перетаскиваемый элемент из другого элемента
-function dragleave_noteHandler (event) {
-	if (this === draggedNote) {
-		return
-	}
-	this.classList.remove('under')
-}
-
-// отпускаем мышку над этим элементом
-function drop_noteHandler (event) {
-	// event.stopPropagation()
-	if (this === draggedNote) {
-		return
-	}
-	// если переносим в этот же столбец - меняем порядок карточек
-	if (this.parentElement === draggedNote.parentElement) {
-		// находим все элементы в столбце и превращаем в массив
-		const note = Array.from(this.parentElement.querySelectorAll('.note'))
-		const indexA = note.indexOf(this)
-		const indexB = note.indexOf(draggedNote)
-
-		// меняем порядок соседних карточек в зависимости от перетаскивания 
-		if (indexA < indexB) {
-			this.parentElement.insertBefore(draggedNote, this)
-			console.log('1')
+	// перетаскиваем карточку в пустую колонку
+	columnElement.addEventListener('drop', function (event) {
+		if (Note.dragged) {
+			return columnElement.querySelector('[data-notes]').append(Note.dragged)
 		}
-		else {
-			this.parentElement.insertBefore(draggedNote, this.nextElementSibling)
-			console.log('2')
-		}
-	}
-	// если другой столбец, то вставляем перед той карточкой, над которой дропнули
-	else {
-		this.parentElement.insertBefore(draggedNote, this)
-	}
+	})
 }
+
+
