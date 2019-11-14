@@ -127,14 +127,27 @@ function dragleave_noteHandler (event) {
 }
 
 // отпускаем мышку над этим элементом
-function drop_noteHandler (event) {ё
+function drop_noteHandler (event) {
 	// event.stopPropagation()
 	if (this === draggedNote) {
 		return
 	}
 	// если переносим в этот же столбец - меняем порядок карточек
 	if (this.parentElement === draggedNote.parentElement) {
+		// находим все элементы в столбце и превращаем в массив
+		const note = Array.from(this.parentElement.querySelectorAll('.note'))
+		const indexA = note.indexOf(this)
+		const indexB = note.indexOf(draggedNote)
 
+		// меняем порядок соседних карточек в зависимости от перетаскивания 
+		if (indexA < indexB) {
+			this.parentElement.insertBefore(draggedNote, this)
+			console.log('1')
+		}
+		else {
+			this.parentElement.insertBefore(draggedNote, this.nextElementSibling)
+			console.log('2')
+		}
 	}
 	// если другой столбец, то вставляем перед той карточкой, над которой дропнули
 	else {
