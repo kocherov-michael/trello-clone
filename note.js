@@ -1,75 +1,65 @@
-const Note = {
-	// id для следующих заметок
-	idCounter: 9,
-	// элемент, который перетаскиваем
-	dragged: null,
+class Note {
+	constructor (id = null, content = '') {
+		const element = this.element = document.createElement('div')
+		element.classList.add('note')
+		element.setAttribute('draggable', 'true')
+		element.textContent = content
 
-	// прослушка на заметке dblclick для редактирования и blur для прекращения
-	process (noteElement) {
-		noteElement.addEventListener('dblclick', function (event) {
-			noteElement.setAttribute('contenteditable', 'true')
-			noteElement.removeAttribute('draggable')
+		if (id) {
+			element.setAttribute('data-note-id', id)
+		}
+		else {
+			element.setAttribute('data-note-id', Note.idCounter)
+			Note.idCounter++
+		}
+
+		// прослушка на заметке dblclick для редактирования и blur для прекращения
+		element.addEventListener('dblclick', function (event) {
+			element.setAttribute('contenteditable', 'true')
+			element.removeAttribute('draggable')
 			// ищем колонку по родительским элементам
-			noteElement.closest('.column').removeAttribute('draggable')
-			noteElement.focus()
+			element.closest('.column').removeAttribute('draggable')
+			element.focus()
 		})
 		
-		noteElement.addEventListener('blur', function (event) {
-			noteElement.removeAttribute('contenteditable')
-			noteElement.setAttribute('draggable', 'true')
-			noteElement.closest('.column').setAttribute('draggable', 'true')
+		element.addEventListener('blur', function (event) {
+			element.removeAttribute('contenteditable')
+			element.setAttribute('draggable', 'true')
+			element.closest('.column').setAttribute('draggable', 'true')
 		
 			// если при потере фокуса у карточки нет контента, то она удаляется
-			if (!noteElement.textContent.trim().length) {
-				noteElement.remove()
+			if (!element.textContent.trim().length) {
+				element.remove()
 			}
 
 			// создали заметку - сохранили
 			Application.save()
 		})
 		
-		noteElement.addEventListener('dragstart', Note.dragstart) 
-		noteElement.addEventListener('dragend', Note.dragend) 
-		noteElement.addEventListener('dragenter', Note.dragenter) 
-		noteElement.addEventListener('dragover', Note.dragover) 
-		noteElement.addEventListener('dragleave', Note.dragleave) 
-		noteElement.addEventListener('drop', Note.drop)
-	},
+		// привязываем this через bind чтобы this ссылался на экземпляр класса, а не на DOM элемент
+		element.addEventListener('dragstart', this.dragstart.bind(this)) 
+		element.addEventListener('dragend', this.dragend.bind(this)) 
+		element.addEventListener('dragenter', this.dragenter.bind(this)) 
+		element.addEventListener('dragover', this.dragover.bind(this)) 
+		element.addEventListener('dragleave', this.dragleave.bind(this)) 
+		element.addEventListener('drop', this.drop.bind(this))
 
-	// создаём элемент заметку
-	create (id = null, content = '') {
-		const noteElement = document.createElement('div')
-		noteElement.classList.add('note')
-		noteElement.setAttribute('draggable', 'true')
-		noteElement.textContent = content
-
-		if (id) {
-			noteElement.setAttribute('data-note-id', id)
-		}
-		else {
-			noteElement.setAttribute('data-note-id', Note.idCounter)
-			Note.idCounter++
-		}
-
-		Note.process(noteElement)
-
-		return noteElement
-	},
+	}
 
 	// начало перетаскивания элемента
 	dragstart (event) {
-		Note.dragged = this
-		this.classList.add('dragged')
+		Note.dragged = this.element
+		this.element.classList.add('dragged')
 
 		event.stopPropagation()
-	},
+	}
 	
 	// конец перетаскивания элемента
 	dragend (event) {
 		event.stopPropagation()
 
 		Note.dragged = null
-		this.classList.remove('dragged')
+		this.element.classList.remove('dragged')
 		
 		document
 			.querySelectorAll('.note')
@@ -77,35 +67,35 @@ const Note = {
 
 		// перетащили карточку - сохранили
 		Application.save()
-	},
+	}
 	
 	// заносим перетаскиваемый элемент над другим элементом
 	dragenter (event) {
 		// Если перетаскиваем не карточку, 
 		// либо если карточку перетаскиваем над той же самой карточкой
-		if (!Note.dragged || this === Note.dragged) {
+		if (!Note.dragged || this.element === Note.dragged) {
 			return
 		}
 		
-		this.classList.add('under')
-	},
+		this.element.classList.add('under')
+	}
 	
 	dragover (event) {
 		event.preventDefault()
-		if (!Note.dragged || this === Note.dragged) {
+		if (!Note.dragged || this.element === Note.dragged) {
 			return
 		}
 		event.stopPropagation()
-	},
+	}
 	
 	// выносим перетаскиваемый элемент из другого элемента
 	dragleave (event) {
-		if (!Note.dragged || this === Note.dragged) {
+		if (!Note.dragged || this.element === Note.dragged) {
 			return
 		}
 		
-		this.classList.remove('under')
-	},
+		this.element.classList.remove('under')
+	}
 	
 	// отпускаем мышку над этим элементом
 	drop (event) {
@@ -118,31 +108,33 @@ const Note = {
 			return
 		}
 		
-		if (this === Note.dragged) {
+		if (this.element === Note.dragged) {
 			return
 		}
 		// если переносим в этот же столбец - меняем порядок карточек
-		if (this.parentElement === Note.dragged.parentElement) {
+		if (this.element.parentElement === Note.dragged.parentElement) {
 			// находим все элементы в столбце и превращаем в массив
-			const note = Array.from(this.parentElement.querySelectorAll('.note'))
-			const indexA = note.indexOf(this)
+			const note = Array.from(this.element.parentElement.querySelectorAll('.note'))
+			const indexA = note.indexOf(this.element)
 			const indexB = note.indexOf(Note.dragged)
 		
 			// меняем порядок соседних карточек в зависимости от перетаскивания 
 			if (indexA < indexB) {
-				this.parentElement.insertBefore(Note.dragged, this)
+				this.element.parentElement.insertBefore(Note.dragged, this.element)
 			}
 			else {
-				this.parentElement.insertBefore(Note.dragged, this.nextElementSibling)
+				this.element.parentElement.insertBefore(Note.dragged, this.element.nextElementSibling)
 			}
 		}
 		// если другой столбец, то вставляем перед той карточкой, над которой дропнули
 		else {
-			this.parentElement.insertBefore(Note.dragged, this)
+			this.element.parentElement.insertBefore(Note.dragged, this.element)
 		}
 	}
 }
 
-
-
-
+// записываем статические поля
+// id для следующих заметок
+Note.idCounter = 8
+// элемент, который перетаскиваем
+Note.dragged = null

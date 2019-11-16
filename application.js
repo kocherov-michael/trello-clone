@@ -78,11 +78,12 @@ const Application = {
 
 			// пробегаемся по записям
 			for (const noteId of column.noteIds) {
-				const note = getNoteById(noteId)
+				
+				const {id, content} = getNoteById(noteId)
 
-				const noteElement = Note.create(note.id, note.content)
+				const note = new Note(id, content)
 				// Вставляем записи в колонки
-				columnElement.querySelector('[data-notes]').append(noteElement)
+				columnElement.querySelector('[data-notes]').append(note.element)
 			}
 		}
 	}
