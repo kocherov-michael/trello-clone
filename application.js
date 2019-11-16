@@ -56,6 +56,7 @@ const Application = {
 
 	// Загружаем состояние приложения
 	load () {
+		
 		if (!localStorage.getItem('trello')) {
 			return
 		}
@@ -65,6 +66,11 @@ const Application = {
 		mountePoint.innerHTML = ''
 
 		const object = JSON.parse(localStorage.getItem('trello'))
+
+		// забираем из памяти id заметок и колонок
+		Column.idCounter = object.columns.idCounter
+		Note.idCounter = object.notes.idCounter
+
 		// пробегаемся по заметкам, и если id совпадает с искомым, заметка будет возвращена
 		const getNoteById = id => object.notes.items.find(note => note.id === id)
 
@@ -86,5 +92,11 @@ const Application = {
 				column.add(note)
 			}
 		}
+		
 	}
+
+	// Удаление
+	// delete () {
+
+	// }
 }

@@ -44,7 +44,7 @@ class Column {
 		// Если тащим над пустым местом - снимаем класс UNDER у всех колонок
 		// Если тащим над колонкой, то event.stopPropagation() не позволяет
 		// документу видеть событие
-		document.addEventListener('dragover', Column.hover)
+		document.addEventListener('dragover', this.hover)
 
 		// редактирование заголовка столбца
 		const headerElement = element.querySelector('.column-header')
@@ -145,6 +145,8 @@ class Column {
 	}
 
 	drop () {
+		// console.log(Trash.delete)
+		// console.log(Trash)
 
 		// если бросаем карточку
 		if (Note.dragged) {
