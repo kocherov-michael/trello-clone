@@ -83,7 +83,7 @@ const Application = {
 
 				const note = new Note(id, content)
 				// Вставляем записи в колонки
-				column.element.querySelector('[data-notes]').append(note.element)
+				column.add(note)
 			}
 		}
 	}

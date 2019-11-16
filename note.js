@@ -1,5 +1,7 @@
 class Note {
 	constructor (id = null, content = '') {
+		const inctance = this
+
 		const element = this.element = document.createElement('div')
 		element.classList.add('note')
 		element.setAttribute('draggable', 'true')
@@ -17,15 +19,15 @@ class Note {
 		element.addEventListener('dblclick', function (event) {
 			element.setAttribute('contenteditable', 'true')
 			element.removeAttribute('draggable')
-			// ищем колонку по родительским элементам
-			element.closest('.column').removeAttribute('draggable')
+			// ищем колонку по родительским элементам использую геттер как поле экземпляра класса
+			inctance.column.removeAttribute('draggable')
 			element.focus()
 		})
 		
 		element.addEventListener('blur', function (event) {
 			element.removeAttribute('contenteditable')
 			element.setAttribute('draggable', 'true')
-			element.closest('.column').setAttribute('draggable', 'true')
+			inctance.column.setAttribute('draggable', 'true')
 		
 			// если при потере фокуса у карточки нет контента, то она удаляется
 			if (!element.textContent.trim().length) {
@@ -67,6 +69,11 @@ class Note {
 
 		// перетащили карточку - сохранили
 		Application.save()
+	}
+
+	// геттер можно использовать как поле объекта при вызове
+	get column () {
+		return this.element.closest('.column')
 	}
 	
 	// заносим перетаскиваемый элемент над другим элементом
@@ -135,6 +142,6 @@ class Note {
 
 // записываем статические поля
 // id для следующих заметок
-Note.idCounter = 8
+Note.idCounter = 1
 // элемент, который перетаскиваем
 Note.dragged = null
