@@ -1,4 +1,5 @@
 Application.load()
+Trash.process()
 
 document
 	.querySelector('[data-action-addColumn]')
