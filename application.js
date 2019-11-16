@@ -69,20 +69,21 @@ const Application = {
 		const getNoteById = id => object.notes.items.find(note => note.id === id)
 
 		// пробегаемся по распарсенному объекту
-		for (const column of object.columns.items) {
-			const columnElement = Column.create(column.id)
+		for (const { id, noteIds, title } of object.columns.items) {
+			const column = new Column(id)
 
-			mountePoint.append(columnElement)
+			mountePoint.append(column.element)
 			// вставляем заголовок
-			columnElement.querySelector('.column-header').textContent = column.title
+			column.element.querySelector('.column-header').textContent = title
 
 			// пробегаемся по записям
-			for (const noteId of column.noteIds) {
-				const note = getNoteById(noteId)
+			for (const noteId of noteIds) {
+				
+				const {id, content} = getNoteById(noteId)
 
-				const noteElement = Note.create(note.id, note.content)
+				const note = new Note(id, content)
 				// Вставляем записи в колонки
-				columnElement.querySelector('[data-notes]').append(noteElement)
+				column.add(note)
 			}
 		}
 	}
