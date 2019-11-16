@@ -10,6 +10,7 @@ const Column = {
 
 	// прослушка кнопки добавления карточки
 	process (columnElement) {
+		console.log('процесс')
 		const spanAction_addNote = columnElement.querySelector('[data-action-addNote]')
 
 		spanAction_addNote.addEventListener('click', function (event) {
@@ -23,6 +24,11 @@ const Column = {
 			noteElement.focus()
 		})
 
+		// Если тащим над пустым местом - снимаем класс UNDER у всех колонок
+		// Если тащим над колонкой, то event.stopPropagation() не позволяет
+		// документу видеть событие
+		document.addEventListener('dragover', Column.hover)
+
 		// редактирование заголовка столбца
 		const headerElement = columnElement.querySelector('.column-header')
 
@@ -35,13 +41,14 @@ const Column = {
 			headerElement.removeAttribute('contenteditable')
 		})
 
-		// Прослушка перетаскивания
+		// Прослушка перетаскивания колонки
 		columnElement.addEventListener('dragstart', Column.dragstart)
 		columnElement.addEventListener('dragend', Column.dragend)
 
+		// Слушаем над чем тащим
 		columnElement.addEventListener('dragover', Column.dragover)
 
-		// перетаскиваем карточку в пустую колонку
+		// Слушаем куда бросаем
 		columnElement.addEventListener('drop', Column.drop)
 	},
 
@@ -123,5 +130,12 @@ const Column = {
 		}
 	},
 
+	hover(event) {
+		event.stopPropagation()
+		// Если тащим над пустым местом - снимаем класс UNDER у всех колонок
+		document
+			.querySelectorAll('.column')
+			.forEach(columnElement => columnElement.classList.remove('under'))
+	}
 	
 }

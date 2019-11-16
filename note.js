@@ -90,6 +90,7 @@ const Note = {
 		if (!Note.dragged || this === Note.dragged) {
 			return
 		}
+		
 		this.classList.remove('under')
 	},
 	
