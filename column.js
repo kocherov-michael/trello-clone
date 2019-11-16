@@ -10,7 +10,6 @@ const Column = {
 
 	// прослушка кнопки добавления карточки
 	process (columnElement) {
-		console.log('процесс')
 		const spanAction_addNote = columnElement.querySelector('[data-action-addNote]')
 
 		spanAction_addNote.addEventListener('click', function (event) {
@@ -39,6 +38,9 @@ const Column = {
 
 		headerElement.addEventListener('blur', function (event) {
 			headerElement.removeAttribute('contenteditable')
+
+			// изменили заголовок - сохранили
+			Application.save()
 		})
 
 		// Прослушка перетаскивания колонки
@@ -50,6 +52,33 @@ const Column = {
 
 		// Слушаем куда бросаем
 		columnElement.addEventListener('drop', Column.drop)
+	},
+
+	// создаём элемент колонку
+	create (id = null) {
+		const columnElement = document.createElement('div')
+		columnElement.classList.add('column')
+		columnElement.setAttribute('draggable', 'true')
+
+		if (id) {
+			columnElement.setAttribute('data-column-id', id)
+		}
+
+		else {
+			columnElement.setAttribute('data-column-id', Column.idCounter)
+			Column.idCounter++
+		}
+
+		columnElement.innerHTML = 
+`<p class="column-header">В плане</p>
+<div data-notes></div>
+<p class="column-footer">
+	<span data-action-addNote class="action">+ Добавить карточку</span>
+</p>`
+	
+		Column.process(columnElement)
+
+		return columnElement
 	},
 
 	dragstart (event) {
@@ -79,6 +108,9 @@ const Column = {
 		document
 		.querySelectorAll('.column')
 		.forEach(columnElement => columnElement.classList.remove('under'))
+
+		// перетащили колонку - сохранили
+		Application.save()
 	},
 
 	dragover (event) {

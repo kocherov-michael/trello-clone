@@ -23,6 +23,9 @@ const Note = {
 			if (!noteElement.textContent.trim().length) {
 				noteElement.remove()
 			}
+
+			// создали заметку - сохранили
+			Application.save()
 		})
 		
 		noteElement.addEventListener('dragstart', Note.dragstart) 
@@ -34,13 +37,20 @@ const Note = {
 	},
 
 	// создаём элемент заметку
-	create () {
+	create (id = null, content = '') {
 		const noteElement = document.createElement('div')
 		noteElement.classList.add('note')
 		noteElement.setAttribute('draggable', 'true')
-		noteElement.setAttribute('data-note-id', Note.idCounter)
+		noteElement.textContent = content
 
-		Note.idCounter++
+		if (id) {
+			noteElement.setAttribute('data-note-id', id)
+		}
+		else {
+			noteElement.setAttribute('data-note-id', Note.idCounter)
+			Note.idCounter++
+		}
+
 		Note.process(noteElement)
 
 		return noteElement
@@ -56,14 +66,17 @@ const Note = {
 	
 	// конец перетаскивания элемента
 	dragend (event) {
-		this.classList.remove('dragged')
+		event.stopPropagation()
+
 		Note.dragged = null
+		this.classList.remove('dragged')
 		
 		document
 			.querySelectorAll('.note')
 			.forEach(x => x.classList.remove('under'))
 
-		event.stopPropagation()
+		// перетащили карточку - сохранили
+		Application.save()
 	},
 	
 	// заносим перетаскиваемый элемент над другим элементом
